@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./tailwind/3.4.1"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+        </script>
+</head>
+<body>
+    <div class="border-2 max-w-[600px] mx-auto max-h-[1200px]">
+        <div class="flex p-2 w-full mx-auto h-max-[200px]">
+            <div class="w-full flex-col pr-2">
+                <div class="mb-2">
+                    <input id="target_input_words"type="text" class="border border-gray-300 p-2 rounded-lg w-full" placeholder="輸入文字(請切為該模式輸入法)">
+                </div>
+                <div class="mb-2">
+                    <input id="target_input" type="text" class="border border-gray-300 p-2 rounded-lg w-full" placeholder="輸入拼法(請切為英文輸入法)">
+                </div>
+            </div>
+            <div class="w-full flex-col pr-2 text-right">
+                <div class="flex items-center">
+                    <input id="chinese" type="radio" name="options" class="mr-2" checked onclick="clearBoard()">
+                    <label for="inputField">注音</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="english" type="radio" name="options" class="mr-2" onclick="clearBoard()">
+                    <label for="inputField">英文(單字模式)</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="englishAlpha" type="radio" name="options" class="mr-2" onclick="clearBoard()">
+                    <label for="inputField">英文(字母模式)</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="da_yi" type="radio" name="options" class="mr-2" onclick="clearBoard()">
+                    <label for="inputField">大易(拼法部分請用空格格開)</label>
+                </div>
+                <button class="w-1/2 bg-neutral-400" onclick="writeValue()">確認</button>
+            </div>
+        </div>
+        <div class="w-full h-max-[400px] mx-auto p-2">
+            <span>輸出文字</span>
+            <div id="output" class="bg-slate-200 w-full h-[150px] rounded-lg m-auto mb-2 p-2"></div>
+            <span>輸出拼法</span>
+            <div id="output_words" class="bg-slate-200 w-full h-[150px] rounded-lg m-auto p-2"></div>
+        </div>
+        <div class="w-full h-max-[400px] mx-auto space-2 flex p-2">
+            <button class="h-[35px] w-1/3 flex justify-center items-center bg-neutral-400 mx-1" onclick="saveFile()">存檔</button>
+            <button class="h-[35px] w-1/3 flex justify-center items-center bg-neutral-400 mx-1" onclick="clearBoard()">全部清除</button>
+            <button class="h-[35px] w-1/3 flex justify-center items-center bg-neutral-400 mx-1" onclick="quit()">結束</button>
+        </div>
+    </div>
+    <script>
+        const { contextBridge, ipcRenderer } = require('electron')
+        window.$ = window.jQuery = require('jquery');
+        
+        $(document).ready(function() {
+            var value = "";
+            var preKey = ""
+            var nowKey = ""
+            $("#target_input").on("keydown", function(event) {
+                if($("#chinese").prop('checked')){
+                    preKey = nowKey;
+                    nowKey = event.key;
+                    if (event.key.toLowerCase() in dict ) {
+                        event.preventDefault();
+                        var inputValue = $(this).val();
+                        if (preKey==='Shift'){
+                            if(nowKey===','){
+                                $(this).val(inputValue + '，');
+                            }else if(nowKey==='.'){
+                                $(this).val(inputValue + '｡');
+                            }else if(nowKey==='/'){
+                                $(this).val(inputValue + '?');
+                            }else if(nowKey==="'"){
+                                $(this).val(inputValue + '、');
+                            }else if(nowKey==='1'){
+                                $(this).val(inputValue + '!');
+                            }
+                        }else{
+                            $(this).val(inputValue + dict[event.key.toLowerCase()]);
+                        }
+                        value = $(this).val();
+                    }
+                }else if($("#english").prop('checked')){
+                    var inputValue = event.key;
+                    var validInput = /^[A-Za-z .]+$/.test(inputValue);
+                    if (!validInput) {
+                        event.preventDefault();
+                    }
+                    value = $(this).val();
+                }else if($("#da_yi").prop('checked')){
+                    if (event.key.toLowerCase() in da_yi_dict ) {
+                        event.preventDefault();
+                        var inputValue = $(this).val();
+                        $(this).val(inputValue + da_yi_dict[event.key.toLowerCase()]);
+                        value = inputValue + da_yi_dict[event.key.toLowerCase()];
+                    }
+                }
+            });
+        });
+        var dict = {
+            "1" : "ㄅ","q" : "ㄆ","a" : "ㄇ","z" : "ㄈ","2" : "ㄉ","w" : "ㄊ","s" : "ㄋ",
+            "x" : "ㄌ","3" : "ˇ","e" : "ㄍ","d" : "ㄎ","c" : "ㄏ","4" : "ˋ","r" : "ㄐ",
+            "f" : "ㄑ","v" : "ㄒ","5" : "ㄓ","t" : "ㄔ","g" : "ㄕ","b" : "ㄖ","6" : "ˊ",
+            "y" : "ㄗ","h" : "ㄘ","n" : "ㄙ","7" : "˙","u" : "ㄧ","j" : "ㄨ","m" : "ㄩ",
+            "8" : "ㄚ","i" : "ㄛ","k" : "ㄜ","," : "ㄝ","9" : "ㄞ","o" : "ㄟ","l" : "ㄠ",
+            "." : "ㄡ","0" : "ㄢ","p" : "ㄣ",";" : "ㄤ","/" : "ㄥ","-" : "ㄦ"," " : "ˉ"
+        }
+        var da_yi_dict = {
+            'q': '石','w': '己','e': '毛','r': '牛','t': '羊','y': '木','u': '火','i': '禾',
+            'o': '水','p': '金','a': '土','s': '竹','d': '戈','f': '十','g': '大','h': '中',
+            'j': '一','k': '弓','l': '人','z': '心','x': '手','c': '口','v': '尸','b': '廿',
+            'n': '山','m': '女',',': '田','.': '難','/': '卜','1': '日','2': '月','3': '白',
+            '4': '甘','5': '目','6': '舟','7': '弓','8': '言','9': '馬','0': '魚','-': '雨',
+            '=': '青','[': '頁',']': '風','\\': '香',';': '鹿','\'': '黑','`': '鳥'
+        }
+        function quit(){
+            ipcRenderer.send("quit");
+        }
+        function saveFile(){
+            var p1 = $("#output").text().trim();
+            var p2 = $("#output_words").text().trim();
+            if ($("#chinese").is(":checked")) {
+                p1 = p1.split('').join(' ');
+                p2 = p2.replace(/([ˊˇˋ˙ˉ，。?!、，])/g, "$1 ");
+            }else if ($("#da_yi").is(":checked")) {
+                p1 = p1.split('').join(' ');
+            }
+
+            if (p1.length <= 0 || p2.length <= 0){
+                ipcRenderer.send("message", "請輸入文字及拼法");
+                return;
+            }
+            if($("#chinese").prop('checked')){
+                ipcRenderer.send("save","=注音輸入法=\n" + "=文字部份=\n" + p1 + "\n=解答部份=\n" + p2);
+            }else if($("#english").prop('checked') || $("#englishAlpha").prop('checked')){
+                ipcRenderer.send("save","=英文輸入法=\n" + "=文字部份=\n" + p1 + "\n=解答部份=\n" + p2);
+            }else if($("#da_yi").prop('checked')){
+                ipcRenderer.send("save","=大易輸入法=\n" + "=文字部份=\n" + p1 + "\n=解答部份=\n" + p2);
+            }
+            
+            clearBoard()
+        }
+        function writeValue(){
+            if ($("#target_input_words").val() && $("#target_input").val()){
+                $("#output").append($("#target_input_words").val())
+                if($("#englishAlpha").is(":checked")){
+                    $("#output_words").append($("#target_input").val().split('').join(' '));
+                }else{
+                    $("#output_words").append($("#target_input").val());
+                }
+                $("#target_input_words").val("");
+                $("#target_input").val("");
+            }else{
+                ipcRenderer.send('message', '輸入匡不可空白');
+            }
+            
+        }
+        function clearBoard(){
+            $("#output").html("");
+            $("#output_words").html("");
+            $("#target_input").val("");
+            $("#target_input_words").val("");
+        }
+        function changeInputId(mode) {
+            if(mode === '注音'){
+                $("#chinese, #english, #da_yi").prop("id", "chinese");
+            }else if(mode === '英文'){
+                $("#chinese, #english, #da_yi").prop("id", "english");
+            }else if(mode === '大易'){
+                $("#chinese, #english, #da_yi").prop("id", "da_yi");
+            }
+            
+        }
+    </script>
+</body>
+</html>

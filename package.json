@@ -1,0 +1,43 @@
+{
+  "name": "keyboard",
+  "version": "1.1.0",
+  "main": "index.js",
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "nodemon": "^3.0.1",
+    "simple-keyboard": "^3.7.26",
+    "xlsx": "^0.18.5"
+  },
+  
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "pack-dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^27.2.2",
+    "electron-builder": "^24.9.1",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.keyboard.app",
+    "productName": "keyboard檔案編輯器",
+    "directories": {
+      "output": "pack"
+    },
+    "files": [
+      "**/*",
+      "!.vscode",
+      "build/"
+    ],
+    "asar": false,
+    "win": {
+      "icon": "icon.jpg"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

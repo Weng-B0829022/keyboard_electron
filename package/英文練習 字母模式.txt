@@ -1,0 +1,5 @@
+=英文輸入法=
+=文字部份=
+Today is a good day to take a trip.
+=解答部份=
+T o d a y   i s   a   g o o d   d a y   t o   t a k e   a   t r i p .

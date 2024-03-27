@@ -1,0 +1,12 @@
+
+
+.simple-keyboard {
+  -webkit-user-select: none !important; /* Safari */
+  -ms-user-select: none !important; /* IE 10 and IE 11 */
+  user-select: none !important; /* Standard syntax */
+}
+
+.focus-style {
+  border: none; /* 移除默认的外边框样式 */
+  outline: none; /* 移除默认的外轮廓样式 */
+}
