@@ -28,11 +28,11 @@
         const { ipcRenderer } = require('electron');
 
         document.getElementById('loadPage1').addEventListener('click', function() {
-            ipcRenderer.send('load-page', 'answers.html');
+            ipcRenderer.send('load-page', 'basic.html');
         });
 
         document.getElementById('loadPage2').addEventListener('click', function() {
-            ipcRenderer.send('load-page', 'quations.html');
+            ipcRenderer.send('load-page', 'quations.html', name, date);
         });
     </script>
 </body>

@@ -90,7 +90,7 @@
                 <div class="bg-opacity-50 flex-col items-center justify-center">
                     <input type="checkbox" id="enableKeyboard" class="form-checkbox h-3 text-red-500 ml-2 mt-1">
                     <label for="enableKeyboard" class="">啟用虛擬鍵盤</label>
-                    <input type="checkbox" id="showRemainingSubtitles" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="1">
+                    <input type="checkbox" id="showRemainingSubtitles" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="1" checked>
                     <label for="showRemainingSubtitles" class="">顯示剩下字幕</label>
                     <input type="checkbox" id="hideRemainingSubtitles" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="2">
                     <label for="hideRemainingSubtitles" class="">隱藏剩下字幕</label>
@@ -151,7 +151,7 @@
         var selectedValue = '1';
         var modeType = -1;
         var engNum = 0;
-        var isAlphaMode = 0;//
+        var isWordMode = 0;//
         var totalTime = 0;
         var maxInputCount = 0;
         var inputCount = new Array(20).fill(0);
@@ -322,6 +322,18 @@
             return true
         }
         function generateResultArray(answerList, correctAnswerList) {
+            function getSelectedValue(selectedValue) {
+                switch (selectedValue) {
+                    case '1':
+                        return '顯示剩下字幕';
+                    case '2':
+                        return '隱藏剩下字幕';
+                    case '3':
+                        return '全部隱藏';
+                    default:
+                        return '未知';
+                }
+            }
             var type = ''
             if (modeType===0){
                 type = '中文輸入法'
@@ -331,8 +343,45 @@
                 type = '大易輸入法'
             }
             const resultArray = [];
-            //resultArray.push([type, totalTime, totalNumbers, answerNumbers, correctNumbers, wrongNumbers, correctRate+'%'],[]);
-            
+            //設定資訊
+            let headerSettingDict = {
+                '是否啟用虛擬鍵盤': '是否啟用虛擬鍵盤',
+                '字幕模式': '字幕模式',
+                '最大輸入錯誤次數': '最大輸入錯誤次數',
+            };
+            let dataSettingDict = {
+                '是否啟用虛擬鍵盤': $("#enableKeyboard").prop("checked") ? '是' : '否',
+                '字幕模式': getSelectedValue(selectedValue),
+                '最大輸入錯誤次數': maxInputCount,
+            };
+            //答題資訊
+            let headerDict = {
+                '總字數': '總字數',
+                '答題數': '答題數',
+                '答對數': '答對數',
+                '打錯數': '打錯數',
+                '正確率': '正確率',
+                '輸入法': '輸入法',
+            };
+            let dataDict = {
+                '總字數': totalNumbers,
+                '答題數': answerNumbers,
+                '答對數': correctNumbers,
+                '打錯數': wrongNumbers,
+                '正確率': correctRate + '%',
+                '輸入法': type,
+            };
+            if (type == '英文輸入法') {
+                dataDict['模式'] = isWordMode ? '單字模式' : '字母模式';
+                headerDict['模式'] = '模式';
+            }
+            resultArray.push(Object.values(headerSettingDict));
+            resultArray.push(Object.values(dataSettingDict));
+            resultArray.push(Object.values(headerDict));
+            resultArray.push(Object.values(dataDict));
+
+            // 添加一個空行
+            resultArray.push([]);
             for (let i = 0; i < answerList.length; i++) {
                 var words = ''
                 if(modeType===0 || modeType===2){
@@ -409,8 +458,8 @@
             $('#fileContent').text(remainContent);
             var $nowContent = $('#nowContent');
             if (modeType===1){
-                console.log(isAlphaMode===1)
-                if (isAlphaMode===1){
+                console.log(isWordMode===1)
+                if (isWordMode===1){
                     if ($nowContent.hasClass('text-[5em]')) {
                         $nowContent.removeClass('text-[5em]');
                     }
@@ -506,16 +555,16 @@
             if (textPartIndex !== -1 && textPartIndex + 1 < lines.length) {
                 var textPart = lines[textPartIndex + 1];
                 var resultArray = [];
-                isAlphaMode = 0 //0:alphaMode, 1:wordsMode
+                isWordMode = 0 //0:alphaMode, 1:wordsMode
                 for (var c = 0; c < textPart.length; c++) {
                     if (c % 2 === 0) {
                         resultArray.push(textPart[c]);
                     }else if(textPart[c]!==' '){ 
-                        isAlphaMode = 1;
+                        isWordMode = 1;
                         break
                     }
                 }
-                if(isAlphaMode){
+                if(isWordMode){
                     resultArray = textPart.split(' ')
                 }
                 return resultArray;
@@ -579,7 +628,7 @@
                 remainContent = fc.slice(1);
                 nowContent = fc.charAt(0);
             }else if(modeType===1){
-                if(isAlphaMode===0){
+                if(isWordMode===0){
                     remainContent = correctAnswerList.slice(1).join('');
                 }else{
                     remainContent = correctAnswerList.slice(1).join(' ');
@@ -629,6 +678,13 @@
             })
         }
         var handleFunctionKey = {
+            "uselessKey":(key)=>{
+                chars.push("{" + key + "}");
+                var charTimeEnd = Date.now();
+                var charTime = charTimeEnd - charTimeStart;
+                charTimeStart = charTimeEnd;
+                charTimeList.push(charTime/1000)
+            },
             "backspace":()=>{
                 chars.push("{Back}");
                 var charTimeEnd = Date.now();
@@ -656,7 +712,7 @@
                 }else if (modeType===1){
                     nowContent = correctAnswerList[engNum+1]
                     engNum += 1;
-                    if(isAlphaMode===0){
+                    if(isWordMode===0){
                         remainContent = correctAnswerList.slice(engNum+1).join('');
                     }else{
                         remainContent = correctAnswerList.slice(engNum+1).join(' ');
@@ -831,27 +887,31 @@
                 return;
             }
             keyBoard = [[
+                '1 2 3 4 5 6 7 8 9 0',
                 'ㄅ ㄉ ˇ ˋ ㄓ ˊ ˙ ㄚ ㄞ ㄢ ㄦ {bksp}',
-                'ㄆ ㄊ ㄍ ㄐ ㄔ ㄗ ㄧ ㄛ ㄟ ㄣ ，',
-                'ㄇ ㄋ ㄎ ㄑ ㄕ ㄘ ㄨ ㄜ ㄠ ㄤ 。 {enter}',
-                'ㄈ ㄌ ㄏ ㄒ ㄖ ㄙ ㄩ ㄝ ㄡ ㄥ',
-                '{space}'
+                'tab ㄆ ㄊ ㄍ ㄐ ㄔ ㄗ ㄧ ㄛ ㄟ ㄣ ，',
+                'caps ㄇ ㄋ ㄎ ㄑ ㄕ ㄘ ㄨ ㄜ ㄠ ㄤ 。 {enter}',
+                'shift ㄈ ㄌ ㄏ ㄒ ㄖ ㄙ ㄩ ㄝ ㄡ ㄥ shift',
+                'ctrl {space} ctrl'
             ],[
-                'q w e r t y u i o p {bksp}',
-                '{lock} a s d f g h j k l {enter}',
-                'z x c v b n m , .',
-                '{space}'
+                '1 2 3 4 5 6 7 8 9 0',
+                'tab q w e r t y u i o p {bksp}',
+                '{caps} a s d f g h j k l {enter}',
+                'shift z x c v b n m , . shift',
+                'ctrl {space} ctrl'
             ],[
+                '1 2 3 4 5 6 7 8 9 0',
                 '巷 言 牛 目 四 王 車 田 八 足 金 鄉 鎮 {bksp}',
-                '石 山 一 工 系 火 艸 木 口 耳 路 街 {enter}',
-                '人 革 日 土 手 鳥 月 立 女 虫 號',
-                '心 水 鹿 禾 馬 魚 雨 力 舟 竹',
-                '{space}'
+                'tab 石 山 一 工 系 火 艸 木 口 耳 路 街',
+                '{caps} 人 革 日 土 手 鳥 月 立 女 虫 號 {enter}',
+                'shift 心 水 鹿 禾 馬 魚 雨 力 舟 竹 shift',
+                'ctrl {space} ctrl'
             ],[
-                'Q W E R T Y U I O P {bksp}',
-                '{lock} A S D F G H J K L {enter}',
-                'Z X C V B N M , .',
-                '{space}'
+                '1 2 3 4 5 6 7 8 9 0',
+                'tab Q W E R T Y U I O P {bksp}',
+                '{caps} A S D F G H J K L {enter}',
+                'shift Z X C V B N M , . shift',
+                'ctrl {space} ctrl'
             ]]
 
             myKeyboard = new Keyboard({
@@ -876,9 +936,15 @@
                     maxInputCountRecord.pop();
                 } else if (button === "{space}") {
                     inputElement.value = currentValue + "ˉ";
+                } else if (button === "tab") {
+                    handleFunctionKey.uselessKey(button);
+                } else if (button === "shift") {
+                    handleFunctionKey.uselessKey(button);
+                } else if (button === "ctrl") {
+                    handleFunctionKey.uselessKey(button);
                 } else if (button === "{enter}") {
                     handleFunctionKey.enter();
-                } else if (button === "{lock}") {
+                } else if (button === "{caps}") {
                     keyboardMode = keyboardMode===1 ? 3 : 1 
                     myKeyboard.setOptions({
                         layout:{

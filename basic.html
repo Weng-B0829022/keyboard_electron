@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>鍵盤打字程式編輯器</title>
+    <script src="./tailwind/3.4.1"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+        </script>
+</head>
+<body class="items-center " style="background-image: url('./assets/標題背景.webp'); background-size:cover">
+    <div class="w-full h-max-[400px] mx-auto space-2 flex flex-col justify-center items-center p-2 pt-48">
+        <input type="text" id="nameInput" placeholder="請輸入姓名" class="w-1/3">
+        <br/>
+        <input type="date" id="dateInput" class="w-1/3">
+        <br/>
+        <button class="h-[35px] w-1/3 flex justify-center items-center bg-[#ffb703] mx-1 mt-1 border border-gray-300 shadow-lg rounded-md hover:bg-[#fca103] hover:shadow-sm transition duration-150 ease-in-out" id="confirmButton">
+            確定
+        </button>
+    </div>
+    
+    <script>
+        const { ipcRenderer } = require('electron');
+
+
+
+        let today = new Date();
+        let formattedDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
+        document.getElementById('dateInput').value = formattedDate;
+
+        document.getElementById('confirmButton').addEventListener('click', function() {
+            const nameValue = document.getElementById('nameInput').value;
+            const dateValue = document.getElementById('dateInput').value;
+            ipcRenderer.send('basic-setting', nameValue + dateValue);
+
+            ipcRenderer.send('load-page', 'answers.html');
+        });
+
+    </script>
+</body>
+</html>

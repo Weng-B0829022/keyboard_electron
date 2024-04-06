@@ -7,7 +7,7 @@ let mainWindow
 
 function createWindow() {
   // 创建一个浏览器窗口
-
+    var basicInfo = '';
     mainWindow = new BrowserWindow({ 
         width: 600, 
         height: 618, 
@@ -22,7 +22,10 @@ function createWindow() {
     
   // 加载应用的 HTML 文件
     mainWindow.loadFile('index.html')
-
+    
+    ipcMain.on('basic-setting', (event, info) => {
+        basicInfo = info;
+    });
     ipcMain.on('load-page', (event, page) => {
         mainWindow.loadFile(page);
     });
@@ -123,7 +126,7 @@ function createWindow() {
                 { name: 'Excel Files', extensions: ['xlsx'] },
                 // You can add more file type filters here
             ],
-            defaultPath : "./result",
+            defaultPath : "./" + basicInfo,
             properties: ['createDirectory'] // Allows users to create a new directory from the dialog
         }
         let { filePath, canceled } = await dialog.showSaveDialog(options);
@@ -132,6 +135,7 @@ function createWindow() {
                 if (!Array.isArray(data) || data.length === 0 || !Array.isArray(data[0])) {
                     throw new Error('Data is not a valid array of arrays.');
                 }
+                //data.unshift(...basicInfo);
                 // Create a new workbook
                 const wb = XLSX.utils.book_new();
                 // Convert the data to worksheet format
