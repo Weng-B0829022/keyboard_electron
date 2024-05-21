@@ -1,0 +1,36 @@
+
+
+.simple-keyboard {
+  -webkit-user-select: none !important; /* Safari */
+  -ms-user-select: none !important; /* IE 10 and IE 11 */
+  user-select: none !important; /* Standard syntax */
+}
+
+.focus-style {
+  border: none; /* 移除默认的外边框样式 */
+  outline: none; /* 移除默认的外轮廓样式 */
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #888888;
+  color: black;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  top:15px;
+  right:-5px;
+  font-size: xx-small;
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

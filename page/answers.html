@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./tailwind/3.4.1"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    },
+                    boxShadow: {
+                        'inset': 'inset 1px 1px 4px rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        }
+        </script>
+    <link rel="stylesheet" href="./answers.css">
+    <link rel="stylesheet" href="./tailwind/index.css">
+    <script src="./tailwind/index.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+</head>
+<body>
+    <div class=" max-w-[1000px] mx-auto max-h-[1200px] space-y-1 ">
+        <div class="flex mx-2 h-[60px] bg-slate-200">
+            <div class="flex text-xs">
+                <div class="w-[48px] h-[40px] cursor-pointer flex items-center flex-col" onclick="loadFile()">
+                    <img src="assets/download-file.png" alt="Download File Button" class="w-[40px] h-[40px]">
+                    <div class="text-center font-bold">載入檔案</div>
+                </div>
+                
+                <div class="w-[48px] h-[40px] cursor-pointer flex items-center flex-col" onclick="save()">
+                    <img src="assets/floppy-disk.png" alt="Floppy Disk Save Button" class="button-image w-[40px] h-[40px]">
+                    <div class="text-center font-bold">儲存</div>
+                </div>
+                <div class="w-[48px] h-[40px] cursor-pointer flex items-center flex-col" onclick="clearCheck()">
+                    <img src="assets/eraser.png" alt="Eraser Button" class="button-image w-[40px] h-[40px]">
+                    <div class="text-center font-bold">清除全部</div>
+                </div>
+                <div class="w-[48px] h-[40px] cursor-pointer flex items-center flex-col" onclick="play()">
+                    <img src="assets/play.png" alt="Delete Button" class="button-image w-[40px] h-[40px]">
+                    <div class="text-center font-bold">開始</div>
+                </div>
+                
+                
+                
+                
+            </div>
+            <div id="record" class="gap-[2px] w-full text-xs auto-cols-auto flex flex-grow justify-center">
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">輸入法</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="type">中文</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">總輸入時間</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="timeDisplay">0:00:00</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">單字輸入時間</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="wordDisplay">0:00:00</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">總字數</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="totalNumbers">0</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">答題數</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="answerNumbers">0</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">答對</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="correctNumbers">0</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">答錯</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="wrongNumbers">0</div>
+                </div>
+                <div class="grid grid-rows-2 ">
+                    <div class="px-[2px] bg-gray-300 text-center flex justify-center items-center font-bold">正確率</div>
+                    <div class="px-[2px] bg-gray-400 text-center flex justify-center items-center" id="correctRate">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex mx-2 h-[100px] space-x-2 text-[0.6em] ">
+            <div class="flex  p-2 h-[100px] bg-slate-200 shadow-inset w-full" id="fileContent"></div>
+            <div class="h-[100px] w-[150px] shadow-inset bg-slate-200 flex-col flex justify-center">
+                <div class="bg-opacity-50 flex-col items-center justify-center">
+                    <input type="checkbox" id="enableKeyboard" class="form-checkbox h-3 text-red-500 ml-2 mt-1">
+                    <label for="enableKeyboard" class="">啟用虛擬鍵盤</label>
+                    <input type="checkbox" id="showRemainingSubtitles" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="1" checked>
+                    <label for="showRemainingSubtitles" class="">顯示剩下字幕</label>
+                    <input type="checkbox" id="hideRemainingSubtitles" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="2">
+                    <label for="hideRemainingSubtitles" class="">隱藏剩下字幕</label>
+                    <input type="checkbox" id="hideAll" class="form-checkbox h-3 w-3 text-red-500 ml-2 mt-1" value="3">
+                    <label for="hideAll" class="">全部隱藏</label><br/>
+                    <span class="ml-2">最大輸入次數:</span>
+                    <input type="number" id="maxInputCount" class="form-input mt-1 w-1/4" placeholder="最大輸入次數" value="3" min="0">
+                </div>
+            </div>
+            <div class="h-[100px] w-[150px] shadow-inset bg-slate-200 flex-col flex justify-center">
+                <div class="bg-opacity-50 flex-col items-center justify-center">
+                    <input type="checkbox" id="enableVoice" class="form-checkbox h-3 text-red-500 ml-2 mt-1">
+                    <label for="enableVoice" class="">啟用聲音</label>
+                    <input type="range" id="rateSlider" min="0.1" max="10" step="0.1" value="1" class="w-full">
+                    <div class="text-center">
+                        <span id="rateValue" class="text-gray-700">速度 (0.1 - 10): 1</span>
+                    </div>
+                    <input type="range" id="pitchSlider" min="0" max="2" step="0.1" value="1" class="w-full">
+                    <div class="text-center">
+                        <span id="pitchValue" class="text-gray-700">音調 (0 - 2): 1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex mx-2 h-[100px] space-x-2">
+            <div id="nowContent" class="w-[120px] h-[100px] bg-slate-200 shadow-inset text-[5em] text-red-500 flex items-center justify-center" ></div>
+            <div class="flex w-full h-[100px] bg-slate-200 shadow-inset">
+                <input class="input w-full h-[5em] mx-2 my-2 focus-style" placeholder="" id="myInput" readonly="true"/>
+                <div class="tooltip">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="15" height="15" viewBox="0 0 24 24" class="my-2">
+                        <path d="M 12 0 C 5.371094 0 0 5.371094 0 12 C 0 18.628906 5.371094 24 12 24 C 18.628906 24 24 18.628906 24 12 C 24 5.371094 18.628906 0 12 0 Z M 12 2 C 17.523438 2 22 6.476563 22 12 C 22 17.523438 17.523438 22 12 22 C 6.476563 22 2 17.523438 2 12 C 2 6.476563 6.476563 2 12 2 Z M 12 5.8125 C 11.816406 5.8125 11.664063 5.808594 11.5 5.84375 C 11.335938 5.878906 11.183594 5.96875 11.0625 6.0625 C 10.941406 6.15625 10.851563 6.285156 10.78125 6.4375 C 10.710938 6.589844 10.6875 6.769531 10.6875 7 C 10.6875 7.226563 10.710938 7.40625 10.78125 7.5625 C 10.851563 7.71875 10.941406 7.84375 11.0625 7.9375 C 11.183594 8.03125 11.335938 8.085938 11.5 8.125 C 11.664063 8.164063 11.816406 8.1875 12 8.1875 C 12.179688 8.1875 12.371094 8.164063 12.53125 8.125 C 12.691406 8.085938 12.816406 8.03125 12.9375 7.9375 C 13.058594 7.84375 13.148438 7.71875 13.21875 7.5625 C 13.289063 7.410156 13.34375 7.226563 13.34375 7 C 13.34375 6.769531 13.289063 6.589844 13.21875 6.4375 C 13.148438 6.285156 13.058594 6.15625 12.9375 6.0625 C 12.816406 5.96875 12.691406 5.878906 12.53125 5.84375 C 12.371094 5.808594 12.179688 5.8125 12 5.8125 Z M 10.78125 9.15625 L 10.78125 18.125 L 13.21875 18.125 L 13.21875 9.15625 Z"></path>
+                    </svg>
+                    <div class="w-[20px] text-center my-2 tooltiptext ">
+                        中文字僅支援(！?。，)四種符號 按法為ctrl+該符號
+                        <br/>
+                        英文字僅支援(.,)四種符號 按法為shift+該符號
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-max-[400px] mx-auto">
+            <div class="simple-keyboard"></div>
+        </div>
+    </div>
+    <script src="./js/answers.js"></script>
+</body>
+</html>

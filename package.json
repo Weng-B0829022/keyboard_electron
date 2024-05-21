@@ -4,11 +4,10 @@
   "main": "index.js",
   "dependencies": {
     "jquery": "^3.7.1",
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.0",
     "simple-keyboard": "^3.7.26",
     "xlsx": "^0.18.5"
   },
-  
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",

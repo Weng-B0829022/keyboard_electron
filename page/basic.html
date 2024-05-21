@@ -40,7 +40,7 @@
             const dateValue = document.getElementById('dateInput').value;
             ipcRenderer.send('basic-setting', nameValue + dateValue);
 
-            ipcRenderer.send('load-page', 'answers.html');
+            ipcRenderer.send('load-page', './page/answers.html');
         });
 
     </script>

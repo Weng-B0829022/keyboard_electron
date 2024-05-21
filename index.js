@@ -21,7 +21,7 @@ function createWindow() {
     })
     
   // 加载应用的 HTML 文件
-    mainWindow.loadFile('index.html')
+    mainWindow.loadFile('./page/index.html')
     
     ipcMain.on('basic-setting', (event, info) => {
         basicInfo = info;
